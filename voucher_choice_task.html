@@ -68,12 +68,27 @@
     margin-bottom: 24px;
   }
   .trial-question {
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .option-label-main {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 20px;
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .option-label-sub {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--muted);
+    opacity: 0.75;
+    margin-bottom: 6px;
+    line-height: 1.3;
   }
 
   .choices {
@@ -135,14 +150,6 @@
     font-size: 1.75rem;
     line-height: 1;
   }
-  .option-type {
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
   .option-amount {
     font-family: 'DM Serif Display', serif;
     font-size: 1.65rem;
@@ -198,7 +205,7 @@
     <div class="progress-label" id="progressLabel">Question 1 of 27</div>
 
     <div class="trial-card" id="trialCard">
-      <div class="trial-question">Please select one of the vouchers</div>
+      <div class="trial-question">Which reward would you like to receive if you win the raffle?</div>
       <div class="choices" id="choicesGrid"></div>
     </div>
 
@@ -251,19 +258,16 @@ const SHOPPING_BAG_SVG = `<svg width="30" height="30" viewBox="0 0 30 30" fill="
 // Cash: banknote emoji appropriate to currency
 const CASH_ICON = isIndia ? '💵' : '💷';
 
-// Circularity SVG: two circular arrows indicating reuse, no leaf/eco symbolism
-const CIRCULARITY_SVG = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Top arc, left to right -->
-  <path d="M7 10 A9 9 0 0 1 23 10" stroke="#7B5E3A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-  <!-- Arrowhead right -->
-  <polyline points="20,7 23,10 20,13" stroke="#7B5E3A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Bottom arc, right to left -->
-  <path d="M23 20 A9 9 0 0 1 7 20" stroke="#7B5E3A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-  <!-- Arrowhead left -->
-  <polyline points="10,23 7,20 10,17" stroke="#7B5E3A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+// Circularity SVG: finalised circular arrows icon
+const CIRCULARITY_SVG = `<svg width="32" height="32" viewBox="-70 -80 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 38.3 32.1 A 50 50 0 0 1 -49.2 8.7" stroke="#7B5E3A" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="0,-9 -7,6 7,6" transform="translate(-49.2,8.7) rotate(80)" fill="#7B5E3A"/>
+  <path d="M -38.3 -32.1 A 50 50 0 0 1 49.2 -8.7" stroke="#7B5E3A" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="0,-9 -7,6 7,6" transform="translate(49.2,-8.7) rotate(80)" fill="#7B5E3A"/>
 </svg>`;
 
 // ── Trial construction ───────────────────────────────────────────────────────
+
 // Fully crossed: 3 cash × 3 secondhand × 3 new = 27 trials
 const trials = [];
 for (const c of VALUES.cash)
@@ -306,21 +310,24 @@ function render() {
   const options = [
     {
       type: 'cash',
-      label: 'Cash voucher',
+      labelMain: 'Cash',
+      labelSub: 'directly paid via Prolific',
       iconHtml: `<span style="font-size:1.75rem;line-height:1">${CASH_ICON}</span>`,
       amount: t.cash,
       cls: 'type-cash'
     },
     {
       type: 'second',
-      label: 'Second hand clothing voucher',
+      labelMain: 'Voucher for second hand clothing stores',
+      labelSub: 'pre-loved clothes',
       iconHtml: CIRCULARITY_SVG,
       amount: t.second,
       cls: 'type-second'
     },
     {
       type: 'new',
-      label: 'New clothing voucher',
+      labelMain: 'Voucher for traditional clothing stores',
+      labelSub: 'popular brands',
       iconHtml: SHOPPING_BAG_SVG,
       amount: t.newStore,
       cls: 'type-new'
@@ -343,7 +350,8 @@ function render() {
         </svg>
       </div>
       <div class="option-icon">${opt.iconHtml}</div>
-      <div class="option-type">${opt.label}</div>
+      <div class="option-label-main">${opt.labelMain}</div>
+      <div class="option-label-sub">(${opt.labelSub})</div>
       <div class="option-amount">${fmt(opt.amount)}</div>
     `;
     grid.appendChild(btn);
