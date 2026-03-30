@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choice Task</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E0DAD0;
+    --text: #1A1612;
+    --muted: #7A726A;
+    --cash-accent: #3D6B5E;
+    --cash-bg: #EAF3F0;
+    --second-accent: #7B5E3A;
+    --second-bg: #F5EDE0;
+    --new-accent: #2B4A7A;
+    --new-bg: #E8EFF8;
+    --radius: 14px;
+    --transition: 200ms cubic-bezier(0.4,0,0.2,1);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px 60px;
+  }
+
+  .container { width: 100%; max-width: 740px; }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    border-radius: 99px;
+    height: 5px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .progress-label {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .trial-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px 28px;
+    margin-bottom: 24px;
+  }
+  .trial-question {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .option-label-main {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+  .option-label-sub {
+    font-size: 0.65rem;
+    font-weight: 400;
+    color: var(--muted);
+    opacity: 0.75;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .choice-btn {
+    position: relative;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 14px 18px;
+    cursor: pointer;
+    background: var(--surface);
+    text-align: center;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition), background var(--transition);
+    outline: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .choice-btn:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  .choice-btn:hover:not(.selected) {
+    border-color: #C0B8AC;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+  }
+
+  .choice-btn.type-cash   { --accent: var(--cash-accent);  --bg-sel: var(--cash-bg); }
+  .choice-btn.type-second { --accent: var(--second-accent); --bg-sel: var(--second-bg); }
+  .choice-btn.type-new    { --accent: var(--new-accent);    --bg-sel: var(--new-bg); }
+
+  .choice-btn.selected {
+    border-color: var(--accent);
+    background: var(--bg-sel);
+    box-shadow: 0 0 0 2px var(--accent);
+    transform: translateY(-2px);
+  }
+  .choice-btn.selected .check-circle { opacity: 1; transform: scale(1); }
+
+  .check-circle {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity var(--transition), transform var(--transition);
+  }
+
+  .option-icon {
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+  .option-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.65rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition), opacity var(--transition), transform var(--transition);
+    letter-spacing: 0.01em;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-back { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-back:hover { background: var(--border); color: var(--text); }
+  .btn-next { background: var(--text); color: #fff; min-width: 110px; }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .btn-next:not(:disabled):hover { background: #3A3330; }
+
+  .completion { text-align: center; padding: 60px 20px; display: none; }
+  .completion.visible { display: block; }
+  .completion-icon { font-size: 3rem; margin-bottom: 20px; }
+  .completion h2 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 10px; }
+  .completion p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+
+  .fade-slide { animation: fadeSlide 0.28s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 520px) {
+    .choices { grid-template-columns: 1fr; }
+    .trial-card { padding: 24px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+
+  <div id="taskView">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">Question 1 of 27</div>
+
+    <div class="trial-card" id="trialCard">
+      <div class="trial-question">Which reward would you like to receive if you win the raffle?</div>
+      <div class="choices" id="choicesGrid"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-back" id="btnBack" onclick="goBack()">← Back</button>
+      <button class="btn btn-next" id="btnNext" onclick="goNext()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div class="completion" id="completionView">
+    <div class="completion-icon">✓</div>
+    <h2>All done!</h2>
+    <p>Thank you for completing all 27 choices.<br>Please continue to the next part of the survey.</p>
+  </div>
+
+</div>
+
+<script>
+// ── Country detection ────────────────────────────────────────────────────────
+// Set via URL param: ?country=UK or ?country=IN
+// Embed in Qualtrics survey URL using Piped Text, e.g.:
+//   https://yourserver.com/task.html?country=${e://Field/country}
+const urlParams = new URLSearchParams(window.location.search);
+const countryParam = (urlParams.get('country') || 'UK').toUpperCase();
+const isIndia = countryParam === 'IN';
+
+const CURRENCY = isIndia
+  ? { symbol: '₹', code: 'INR' }
+  : { symbol: '£', code: 'GBP' };
+
+// ── Values ───────────────────────────────────────────────────────────────────
+// UK values as designed; India values derived from World Bank PPP factors
+// (GBP PPP ≈ £0.70/int'l$, INR PPP ≈ ₹25/int'l$ → ~₹36 per £1 in real terms)
+//
+// UK cash:    £4  / £5  / £6
+// UK voucher: £12 / £15 / £18
+//
+// IN cash:    ₹150 / ₹175 / ₹200
+// IN voucher: ₹400 / ₹550 / ₹650
+const VALUES = isIndia
+  ? { cash: [150, 175, 200], voucher: [400, 550, 650] }
+  : { cash: [4, 5, 6],       voucher: [12, 15, 18] };
+
+// Neutral shopping bag SVG — monochrome, no colour bias
+const SHOPPING_BAG_SVG = `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 11h14l-2 13H10L8 11Z" stroke="#7A726A" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M11 11V9a4 4 0 0 1 8 0v2" stroke="#7A726A" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Cash: banknote emoji appropriate to currency
+const CASH_ICON = isIndia ? '💵' : '💷';
+
+// Circularity SVG: finalised circular arrows icon
+const CIRCULARITY_SVG = `<svg width="32" height="32" viewBox="-70 -80 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 38.3 32.1 A 50 50 0 0 1 -49.2 8.7" stroke="#7B5E3A" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="0,-9 -7,6 7,6" transform="translate(-49.2,8.7) rotate(80)" fill="#7B5E3A"/>
+  <path d="M -38.3 -32.1 A 50 50 0 0 1 49.2 -8.7" stroke="#7B5E3A" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="0,-9 -7,6 7,6" transform="translate(49.2,-8.7) rotate(80)" fill="#7B5E3A"/>
+</svg>`;
+
+// ── Trial construction ───────────────────────────────────────────────────────
+
+// Fully crossed: 3 cash × 3 secondhand × 3 new = 27 trials
+const trials = [];
+for (const c of VALUES.cash)
+  for (const s of VALUES.voucher)
+    for (const n of VALUES.voucher)
+      trials.push({ cash: c, second: s, newStore: n });
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+shuffle(trials);
+
+// ── State ────────────────────────────────────────────────────────────────────
+const responses = new Array(trials.length).fill(null);
+// Pre-generate a shuffled tile order per trial so back-navigation
+// shows the same layout the participant originally saw.
+const trialOrders = trials.map(() => {
+  const order = ['cash', 'second', 'new'];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+});
+let current = 0;
+
+function fmt(n) {
+  return isIndia
+    ? CURRENCY.symbol + n.toLocaleString('en-IN')
+    : CURRENCY.symbol + n;
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  const total = trials.length;
+  const t = trials[current];
+
+  document.getElementById('progressFill').style.width = (current / total * 100) + '%';
+  document.getElementById('progressLabel').textContent = `Question ${current + 1} of ${total}`;
+
+  const card = document.getElementById('trialCard');
+  card.classList.remove('fade-slide');
+  void card.offsetWidth;
+  card.classList.add('fade-slide');
+
+  const options = [
+    {
+      type: 'cash',
+      labelMain: 'Cash',
+      labelSub: 'directly paid via Prolific',
+      iconHtml: `<span style="font-size:1.75rem;line-height:1">${CASH_ICON}</span>`,
+      amount: t.cash,
+      cls: 'type-cash'
+    },
+    {
+      type: 'second',
+      labelMain: 'Voucher for second hand clothing stores',
+      labelSub: 'pre-loved clothes',
+      iconHtml: CIRCULARITY_SVG,
+      amount: t.second,
+      cls: 'type-second'
+    },
+    {
+      type: 'new',
+      labelMain: 'Voucher for traditional clothing stores',
+      labelSub: 'popular brands',
+      iconHtml: SHOPPING_BAG_SVG,
+      amount: t.newStore,
+      cls: 'type-new'
+    }
+  ];
+
+  // Apply this trial's pre-generated tile order
+  const orderedOptions = trialOrders[current].map(type => options.find(o => o.type === type));
+
+  const grid = document.getElementById('choicesGrid');
+  grid.innerHTML = '';
+  const sel = responses[current];
+
+  orderedOptions.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn ' + opt.cls + (sel === opt.type ? ' selected' : '');
+    btn.setAttribute('aria-pressed', sel === opt.type ? 'true' : 'false');
+    btn.onclick = () => select(opt.type);
+    btn.innerHTML = `
+      <div class="check-circle">
+        <svg viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 4.5L4.5 8 11 1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="option-icon">${opt.iconHtml}</div>
+      <div class="option-label-main">${opt.labelMain}</div>
+      <div class="option-label-sub">(${opt.labelSub})</div>
+      <div class="option-amount">${fmt(opt.amount)}</div>
+    `;
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('btnBack').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').disabled = sel === null;
+  document.getElementById('btnNext').textContent = current === total - 1 ? 'Finish ✓' : 'Next →';
+}
+
+function select(type) {
+  responses[current] = type;
+  render();
+}
+
+function goNext() {
+  if (responses[current] === null) return;
+  if (current === trials.length - 1) finish();
+  else { current++; render(); }
+}
+
+function goBack() {
+  if (current > 0) { current--; render(); }
+}
+
+function finish() {
+  const result = trials.map((t, i) => ({
+    trial:      i + 1,
+    country:    isIndia ? 'IN' : 'UK',
+    currency:   CURRENCY.code,
+    cash:       t.cash,
+    second:     t.second,
+    newStore:   t.newStore,
+    tileOrder:  trialOrders[i].join(','),
+    choice:     responses[i]
+  }));
+
+  const jsonResult = JSON.stringify(result);
+  console.log('Voucher task complete. Responses:', jsonResult);
+
+  // Write to Qualtrics embedded data fields
+  try {
+    Qualtrics.SurveyEngine.setEmbeddedData('voucher_choices',  jsonResult);
+    Qualtrics.SurveyEngine.setEmbeddedData('voucher_country',  isIndia ? 'IN' : 'UK');
+    Qualtrics.SurveyEngine.setEmbeddedData('voucher_task_complete', '1');
+  } catch(e) {
+    // Not running inside Qualtrics — safe to ignore
+  }
+
+  document.getElementById('taskView').style.display = 'none';
+  document.getElementById('completionView').classList.add('visible');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
